@@ -2,6 +2,7 @@
 #include <bluefruit.h>
 #include "debug_serial.h"
 #include "led13.h"
+#include "buzzer.h"
 
 #include "button.h"
 
@@ -12,6 +13,8 @@
 #define SHORT_PRESS   1000 //ms
 #define MEDIUM_PRESS  3000 //ms
 #define LONG_PRESS    5000 //ms
+
+#define BEEP_LENGTH   100
 
 typedef struct button_instance
 {
@@ -60,7 +63,7 @@ void button_init( void )
     // init all button pins
     for( uint8_t i = 0; i < BUTTON_COUNT; i++ )
     {
-        pinMode( all_buttons[i]->pin, INPUT_PULLDOWN);
+        pinMode( all_buttons[i]->pin, INPUT_PULLDOWN );
         attachInterrupt( all_buttons[i]->pin, all_buttons[i]->callback, ISR_DEFERRED | CHANGE );
     }
 }
@@ -81,6 +84,7 @@ void process_button_press( button_instance_e * _button_instance )
     if ( HIGH == pin_state )
     {
         _button_instance->timer = millis();
+        buzzer_play_beep( BEEP_LENGTH );
     }
     else
     {

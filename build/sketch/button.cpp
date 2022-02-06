@@ -3,6 +3,7 @@
 #include <bluefruit.h>
 #include "debug_serial.h"
 #include "led13.h"
+#include "buzzer.h"
 
 #include "button.h"
 
@@ -13,6 +14,8 @@
 #define SHORT_PRESS   1000 //ms
 #define MEDIUM_PRESS  3000 //ms
 #define LONG_PRESS    5000 //ms
+
+#define BEEP_LENGTH   100
 
 typedef struct button_instance
 {
@@ -58,10 +61,10 @@ button_instance_e * all_buttons[] = { &button_left, &button_right };
 
 void button_init( void )
 {
-    // init all pins
+    // init all button pins
     for( uint8_t i = 0; i < BUTTON_COUNT; i++ )
     {
-        pinMode( all_buttons[i]->pin, INPUT_PULLDOWN);
+        pinMode( all_buttons[i]->pin, INPUT_PULLDOWN );
         attachInterrupt( all_buttons[i]->pin, all_buttons[i]->callback, ISR_DEFERRED | CHANGE );
     }
 }
@@ -82,6 +85,7 @@ void process_button_press( button_instance_e * _button_instance )
     if ( HIGH == pin_state )
     {
         _button_instance->timer = millis();
+        buzzer_play_beep( BEEP_LENGTH );
     }
     else
     {
@@ -94,15 +98,17 @@ void process_button_press( button_instance_e * _button_instance )
 
 void action_button_handler( uint32_t press_duration, button_instance_e * _button_instance )
 {
+    // if ( press_duration >= DEBOUNCE_TIME )
+    // {
+    //     buzzer_play_beep( BEEP_LENGTH );
+    // }
+
     if( press_duration >= LONG_PRESS )
     {
         if( _button_instance->long_press_handler != NULL )
         {
             _button_instance->long_press_handler();
         }
-        int string_length = sprintf( debug_serial_scratchpad, "Pin %d long press\n", _button_instance->pin);
-        debug_serial_print( debug_serial_scratchpad, string_length );
-        
     }
     else if( press_duration >= MEDIUM_PRESS )
     {
@@ -110,9 +116,6 @@ void action_button_handler( uint32_t press_duration, button_instance_e * _button
         {
             _button_instance->medium_press_handler();
         }
-        int string_length = sprintf( debug_serial_scratchpad, "Pin %d medium press\n", _button_instance->pin);
-        debug_serial_print( debug_serial_scratchpad, string_length );
-        
     }
     else if( press_duration >= DEBOUNCE_TIME )
     {
@@ -120,10 +123,6 @@ void action_button_handler( uint32_t press_duration, button_instance_e * _button
         {
             _button_instance->short_press_handler();
         }
-
-        int string_length = sprintf( debug_serial_scratchpad, "Pin %d short press\n", _button_instance->pin);
-        debug_serial_print( debug_serial_scratchpad, string_length );
-        
     }
 }
 

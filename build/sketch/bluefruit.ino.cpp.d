@@ -206,4 +206,5 @@ D:\git\bluefruit\build\sketch\bluefruit.ino.cpp.o: \
  D:\git\bluefruit\build\sketch\debug_serial.h \
  D:\git\bluefruit\build\sketch\neopixel.h \
  D:\git\bluefruit\build\sketch\led13.h \
- D:\git\bluefruit\build\sketch\button.h
+ D:\git\bluefruit\build\sketch\button.h \
+ D:\git\bluefruit\build\sketch\buzzer.h

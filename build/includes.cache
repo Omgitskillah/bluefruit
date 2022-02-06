@@ -50,6 +50,11 @@
     "Includepath": null
   },
   {
+    "Sourcefile": "D:\\git\\bluefruit\\build\\sketch\\buzzer.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
     "Sourcefile": "D:\\git\\bluefruit\\build\\sketch\\debug_serial.cpp",
     "Include": "",
     "Includepath": null
