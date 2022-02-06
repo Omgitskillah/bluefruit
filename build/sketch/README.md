@@ -2,6 +2,8 @@
 # E-INK OVER BLUETOOTH
 Eink over BLE project written to run on the [Adafruit playground Bluefruit](https://www.adafruit.com/product/4333)
 
+When I bought some box full of goodies from Adafruit, they added in a couple of free gifts and the Adafruit Playground Bluefruit was one of them. 
+
 Will start of using the Arduino IDE to program and leverage the simplicity of using the `.ino` `setup()` and `loop()` functions.
 
 To successfully compile this project, install Arduino 1.8.19 then install the latest board support from Adafruit. Using older Arduino IDE with the latest Adafruit board support causes a compilation error where some modules can't be reached.

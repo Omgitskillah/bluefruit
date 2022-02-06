@@ -1,21 +1,18 @@
 #include <Arduino.h>
+#include <bluefruit.h>
 #include "debug_serial.h"
-#include "neopixel.h"
 
-void setup()
+#include "led13.h"
+#include "button.h"
+
+void setup( void )
 {
     debug_serial_init();
-    neopixel_init();
+    led13_init();
+    button_init();
 }
 
-void loop()
+void loop( void )
 {
-    neopixel_clear_all();
-
-    for( uint8_t i = 0; i < NEOPIXEL_COUNT; i++ )
-    {
-        neopixel_turn_on( i, 100, 0, 100);
-        delay( 1000 );
-    }
 
 }
