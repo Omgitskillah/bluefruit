@@ -204,5 +204,6 @@ D:\git\bluefruit\build\sketch\bluefruit.ino.cpp.o: \
  C:\Users\clarence.alucho\AppData\Local\Arduino15\packages\adafruit\hardware\nrf52\1.3.0\libraries\Bluefruit52Lib\src/clients/BLEClientBas.h \
  C:\Users\clarence.alucho\AppData\Local\Arduino15\packages\adafruit\hardware\nrf52\1.3.0\cores\nRF5/utility/AdaCallback.h \
  D:\git\bluefruit\build\sketch\debug_serial.h \
+ D:\git\bluefruit\build\sketch\neopixel.h \
  D:\git\bluefruit\build\sketch\led13.h \
  D:\git\bluefruit\build\sketch\button.h

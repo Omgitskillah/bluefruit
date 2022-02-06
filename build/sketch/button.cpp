@@ -6,30 +6,138 @@
 
 #include "button.h"
 
-#define BUTTON_LEFT (34)
+#define BUTTON_LEFT   PIN_BUTTON1
+#define BUTTON_RIGHT  PIN_BUTTON2
 
-void digital_callback(void);
-void button_init( void );
+#define DEBOUNCE_TIME 50   //ms
+#define SHORT_PRESS   1000 //ms
+#define MEDIUM_PRESS  3000 //ms
+#define LONG_PRESS    5000 //ms
 
+typedef struct button_instance
+{
+    button_id_e id;
+    uint32_t pin;
+    uint32_t timer;
+    uint8_t previous_state;
+    uint8_t current_state;
+    void (* callback)( void );
+    void (* short_press_handler)( void );
+    void (* medium_press_handler)( void );
+    void (* long_press_handler)( void );
+} button_instance_e;
+
+void button_right_callback(void);
+void button_left_callback(void);
+void process_button_press( button_instance_e * _button_instance );
+void action_button_handler( uint32_t press_duration, button_instance_e * _button_instance );
+
+button_instance_e button_right = { .id = BUTTON_B,
+                                   .pin = PIN_BUTTON2,
+                                   .timer = 0,
+                                   .previous_state = LOW,
+                                   .current_state = LOW,
+                                   .callback = button_right_callback,
+                                   .short_press_handler = NULL,
+                                   .medium_press_handler = NULL,
+                                   .long_press_handler = NULL };
+
+button_instance_e button_left = { .id = BUTTON_A,
+                                   .pin = PIN_BUTTON1,
+                                   .timer = 0,
+                                   .previous_state = LOW,
+                                   .current_state = LOW,
+                                   .callback = button_left_callback,
+                                   .short_press_handler = NULL,
+                                   .medium_press_handler = NULL,
+                                   .long_press_handler = NULL };
+
+button_instance_e * all_buttons[] = { &button_left, &button_right };
+
+#define BUTTON_COUNT sizeof(all_buttons) / sizeof(all_buttons[0])
 
 void button_init( void )
 {
-    pinMode( BUTTON_LEFT, INPUT_PULLUP);
-    attachInterrupt( BUTTON_LEFT, digital_callback, CHANGE );
+    // init all pins
+    for( uint8_t i = 0; i < BUTTON_COUNT; i++ )
+    {
+        pinMode( all_buttons[i]->pin, INPUT_PULLDOWN);
+        attachInterrupt( all_buttons[i]->pin, all_buttons[i]->callback, ISR_DEFERRED | CHANGE );
+    }
 }
 
-void digital_callback(void)
+void button_right_callback(void)
 {
-    uint8_t pin_state = digitalRead( BUTTON_LEFT );
-    // int string_length = sprintf( debug_serial_scratchpad, "Pin value: %s", pin_state );
-    // debug_serial_print( debug_serial_scratchpad, string_length );
+    process_button_press( &button_right );
+}
 
-    if( true == pin_state )
+void button_left_callback(void)
+{
+    process_button_press( &button_left );
+}
+
+void process_button_press( button_instance_e * _button_instance )
+{
+    uint8_t pin_state = digitalRead( _button_instance->pin );
+    if ( HIGH == pin_state )
     {
-        led13_set( LED13_ON );
+        _button_instance->timer = millis();
     }
     else
     {
-        led13_set( LED13_OFF );
+        uint32_t current_millis = millis();
+        uint32_t press_duration = current_millis - _button_instance->timer;
+        
+        action_button_handler( press_duration, _button_instance );
+    }
+}
+
+void action_button_handler( uint32_t press_duration, button_instance_e * _button_instance )
+{
+    if( press_duration >= LONG_PRESS )
+    {
+        if( _button_instance->long_press_handler != NULL )
+        {
+            _button_instance->long_press_handler();
+        }
+        int string_length = sprintf( debug_serial_scratchpad, "Pin %d long press\n", _button_instance->pin);
+        debug_serial_print( debug_serial_scratchpad, string_length );
+        
+    }
+    else if( press_duration >= MEDIUM_PRESS )
+    {
+        if( _button_instance->medium_press_handler != NULL )
+        {
+            _button_instance->medium_press_handler();
+        }
+        int string_length = sprintf( debug_serial_scratchpad, "Pin %d medium press\n", _button_instance->pin);
+        debug_serial_print( debug_serial_scratchpad, string_length );
+        
+    }
+    else if( press_duration >= DEBOUNCE_TIME )
+    {
+        if( _button_instance->short_press_handler != NULL )
+        {
+            _button_instance->short_press_handler();
+        }
+
+        int string_length = sprintf( debug_serial_scratchpad, "Pin %d short press\n", _button_instance->pin);
+        debug_serial_print( debug_serial_scratchpad, string_length );
+        
+    }
+}
+
+void button_subscribe( button_id_e _button_id, void (* _long_press)(void),
+                                               void (* _medium_press)(void),
+                                               void (* _short_press)(void) )
+{
+    for( uint8_t i = 0; i < BUTTON_COUNT; i++ )
+    {
+        if( all_buttons[i]->id == _button_id )
+        {
+            all_buttons[i]->long_press_handler = _long_press;
+            all_buttons[i]->medium_press_handler = _medium_press;
+            all_buttons[i]->short_press_handler = _short_press;
+        }
     }
 }

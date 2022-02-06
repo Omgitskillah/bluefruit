@@ -2,57 +2,87 @@
 #include <Arduino.h>
 #include <bluefruit.h>
 #include "debug_serial.h"
-
+#include "neopixel.h"
 #include "led13.h"
 #include "button.h"
 
+void toggle_pixel_1( void );
+void toggle_pixel_3( void );
 
-uint8_t all_pins[] =
-{
-    PIN_A0
-    ,PIN_A1
-    ,PIN_A2
-    ,PIN_A3
-    ,PIN_A4
-    ,PIN_A5
-    ,PIN_A6
-    ,PIN_A7
-    ,PIN_A8
-    ,PIN_A9
-    ,PIN_LED1    
-    ,PIN_NEOPIXEL
-    ,NEOPIXEL_NUM
-    ,LED_BUILTIN
-    ,LED_RED 
-    ,LED_BLUE
-    ,PIN_BUTTON1
-    ,PIN_BUTTON2
-};
-
-#line 31 "D:\\git\\bluefruit\\bluefruit.ino"
+#line 11 "D:\\git\\bluefruit\\bluefruit.ino"
 void setup( void );
-#line 43 "D:\\git\\bluefruit\\bluefruit.ino"
+#line 21 "D:\\git\\bluefruit\\bluefruit.ino"
 void loop( void );
-#line 31 "D:\\git\\bluefruit\\bluefruit.ino"
+#line 11 "D:\\git\\bluefruit\\bluefruit.ino"
 void setup( void )
 {
     debug_serial_init();
-    // led13_init();
-    // button_init();
+    neopixel_init();
+    button_init();
 
-    for( uint8_t i = 0; i < sizeof(all_pins); i++ )
-    {
-        pinMode( all_pins[i], INPUT_PULLUP);
-    }
+    button_subscribe( BUTTON_A, NULL, NULL, toggle_pixel_1 );
+    button_subscribe( BUTTON_B, NULL, toggle_pixel_3, NULL );
 }
 
 void loop( void )
 {
-    for( uint8_t i = 0; i < sizeof(all_pins); i++ )
-    {
-        Serial.print( digitalRead( all_pins[i] ) );
-    }
-     Serial.println();
 
-     delay( 1000 );
+}
+
+void toggle_pixel_1( void )
+{
+    static uint8_t pixel_1_state = 0;
+
+    switch (pixel_1_state)
+    {
+        case 0:
+            neopixel_turn_on( 1, 255, 0, 0 );
+            break;
+        case 1:
+            neopixel_turn_on( 1, 0, 255, 0 );
+            break;
+        case 2:
+            neopixel_turn_on( 1, 0, 0, 255 );
+            break;
+        case 3:
+            neopixel_turn_on( 1, 0, 0, 0 );
+            break;
+        default:
+            break;
+    }
+
+    pixel_1_state++;
+    if( pixel_1_state > 3 )
+    {
+        pixel_1_state = 0;
+    }
+}
+
+void toggle_pixel_3( void )
+{
+    static uint8_t pixel_2_state = 0;
+
+    switch (pixel_2_state)
+    {
+        case 0:
+            neopixel_turn_on( 3, 255, 0, 0 );
+            break;
+        case 1:
+            neopixel_turn_on( 3, 0, 255, 0 );
+            break;
+        case 2:
+            neopixel_turn_on( 3, 0, 0, 255 );
+            break;
+        case 3:
+            neopixel_turn_on( 3, 0, 0, 0 );
+            break;
+        default:
+            break;
+    }
+
+    pixel_2_state++;
+    if( pixel_2_state > 3 )
+    {
+        pixel_2_state = 0;
+    }
 }
